@@ -78,7 +78,6 @@ class SessionManager:
 
     def manage_ssh_connection(self):
         self.auth_list[0] = 'ssh ' + self.hostname
-        del self.auth_list[1]
         response = ''
         for command in self.auth_list:
             response = self.run_command_and_get_response(command.encode('ascii') + b'\n')
