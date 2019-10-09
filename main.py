@@ -1,7 +1,11 @@
 import getpass
 import paramiko
 import sys
+import time
+import os
+import concurrent.futures
 
+import csv_writer as csv
 import session_manager as sm
 
 
@@ -26,24 +30,22 @@ def main():
             sys.exit(1)
 
         session = ssh.invoke_shell()
-        session_manager = sm.SessionManager(session, auth_list)
+        dir_path = os.getcwd() + os.sep + time.strftime('%Y-%m-%d_%H:%M') + '_output'
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+        csv_writer = csv.CSVWriter(dir_path, ['HOSTNAME', 'TELNET', 'SSH', 'VERSION', 'SERIALNUMBER'])
+        session_manager = sm.SessionManager(session, auth_list, csv_writer, dir_path)
 
         try:
-            with open('hostnames.txt') as hostnames:
-                for hostname in hostnames:
-                    session_manager.set_hostname(hostname.strip())
-                    status = session_manager.manage_telnet_connection()
-                    if status:
-                        session_manager.run_commands_and_fetch_result()
-                        session_manager.manage_ssh_connection()
-                    else:
-                        status = session_manager.manage_ssh_connection()
-                        if status:
-                            session_manager.run_commands_and_fetch_result()
-            session_manager.exit_session()
+            with open('hostnames.txt') as file:
+                hostnames = [hostname.rstrip('\n') for hostname in file]
         except Exception as ex:
             print(ex)
             sys.exit(1)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(session_manager.manage, hostnames)
+        csv_writer.close()
 
 
 if __name__ == '__main__':
