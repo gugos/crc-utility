@@ -1,6 +1,6 @@
 import os
 import time
-from collections import OrderedDict
+from util_module import AttributeOrderedDict
 
 import commands_manager as cm
 
@@ -24,25 +24,25 @@ class SessionManager:
 
     def manage(self, hostname):
         fieldnames = self.__csv_writer.get_fieldnames()
-        values_dict = OrderedDict(zip(fieldnames, [''] * len(fieldnames)))
-        values_dict['HOSTNAME'] = hostname
+        values_dict = AttributeOrderedDict(AttributeOrderedDict.create_dict(fieldnames))
+        values_dict.HOSTNAME = hostname
         telnet_status = self.__manage_telnet_connection(hostname)
         if telnet_status:
-            self.__run_commands_and_fetch_result(hostname)
+            self.__run_commands_and_fetch_result(values_dict)
             ssh_status = self.__manage_ssh_connection(hostname)
         else:
             ssh_status = self.__manage_ssh_connection(hostname)
             if ssh_status:
-                self.__run_commands_and_fetch_result(hostname)
-        values_dict['TELNET'] = self.__status_to_text(telnet_status)
-        values_dict['SSH'] = self.__status_to_text(ssh_status)
+                self.__run_commands_and_fetch_result(values_dict)
+        values_dict.TELNET = self.__status_to_text(telnet_status)
+        values_dict.SSH = self.__status_to_text(ssh_status)
         self.__csv_writer.add_to_csv(values_dict)
 
     def __status_to_text(self, status):
         return 'YES' if status else 'NO'
 
     def __run_commands_and_fetch_result(self, values_dict):
-        with open(self.__dir_path + os.sep + values_dict['HOSTNAME'] + '_log', 'w') as log_file:
+        with open(self.__dir_path + os.sep + values_dict.HOSTNAME + '_log', 'w') as log_file:
             for command in self.__commands_list:
                 response = self.__run_command_and_get_response(command.get_command())
                 log_file.write(response)
