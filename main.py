@@ -5,8 +5,8 @@ import time
 import os
 import concurrent.futures
 
-import csv_writer as csv
-import session_manager as sm
+from csv_writer import CSVWriter
+from session_manager import SessionManager
 
 
 def main():
@@ -33,8 +33,8 @@ def main():
         dir_path = os.getcwd() + os.sep + time.strftime('%Y-%m-%d_%H:%M') + '_output'
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
-        csv_writer = csv.CSVWriter(dir_path, ['HOSTNAME', 'TELNET', 'SSH', 'VERSION', 'SERIALNUMBER'])
-        session_manager = sm.SessionManager(session, auth_list, csv_writer, dir_path)
+        csv_writer = CSVWriter(dir_path, ['HOSTNAME', 'TELNET', 'SSH', 'VERSION', 'SERIALNUMBER'])
+        session_manager = SessionManager(session, auth_list, csv_writer, dir_path)
 
         try:
             with open('hostnames.txt') as file:

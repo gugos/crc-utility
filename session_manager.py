@@ -1,8 +1,7 @@
 import os
 import time
 from util_module import AttributeOrderedDict
-
-import commands_manager as cm
+from commands_manager import CommandsManager
 
 
 def print_log(get_response):
@@ -19,7 +18,7 @@ class SessionManager:
         self.__auth_list = auth_list
         self.__csv_writer = csv_writer
         self.__dir_path = dir_path
-        self.__commands_manager = cm.CommandsManager()
+        self.__commands_manager = CommandsManager()
         self.__commands_list = self.__commands_manager.get_commands_list()
 
     def manage(self, hostname):
